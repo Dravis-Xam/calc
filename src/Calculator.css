@@ -26,9 +26,10 @@
     background-color: white;
     color: black;
     padding: 10px;
-    width: 155px;
+    width: 90%;
     border-radius: 5px;
     font-size: 32px;
+    min-height: 30px;
 }
 
 .keypad {
@@ -47,9 +48,56 @@
     color: white;
     font-size: 20px;
     font-family: dosis;
+    cursor: pointer;
     width: 120px;
     font-weight: 700;
 }
 .keypad > *:hover {
     background-color: #333;
+}
+
+.memory {
+    display: flex;
+    position: absolute;
+    right: 10px;
+    top: 60%;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.memory > * {
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    font-size: 16px;
+    font-family: dosis;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+}
+
+.error {
+    position: absolute;
+    top: -10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: fit-content;
+    width: fit-content;
+    text-align: center;
+    color: white;
+    border-radius: 100px;
+}
+
+.message {
+    position: absolute;
+    top: -10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: fit-content;
+    width: fit-content;
+    text-align: center;
+    color: white;
+    border-radius: 100px;
 }
