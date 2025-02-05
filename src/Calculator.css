@@ -101,3 +101,8 @@
     color: white;
     border-radius: 100px;
 }
+
+.error, .message {
+    padding: 8px 10px;
+    transition: all .3s ease-in-out;
+}
