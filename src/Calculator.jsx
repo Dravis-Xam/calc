@@ -187,8 +187,16 @@ export default function Calculator() {
                     Forget
                 </button>
             </div>
-            {visible && <div className='message'>{message}</div>}
-            {visible && <div className='error'>{error}</div>}
+            {visible && (
+                <div className={`message ${visible ? 'visible' : ''}`}>
+                    {message}
+                </div>
+            )}
+            {visible && (
+                <div className={`error ${visible ? 'visible' : ''}`}>
+                    {error}
+                </div>
+            )}
         </div>
     );
 }
