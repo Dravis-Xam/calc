@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './Calculator.css';
 
 export default function Calculator() {
@@ -7,14 +7,20 @@ export default function Calculator() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [visible, setVisible] = useState(false);
+    const [oldInput, setOldInput] = useState(''); // Store the old input for display
 
     const [prevCalculation, setPrevCalculation] = useState(() => {
         const storedData = localStorage.getItem('prevCalculation');
         return storedData ? JSON.parse(storedData) : [];
     });
-    const [currentIndex, setCurrentIndex] = useState(-1); // Track current index in prevCalculation
+    const [currentIndex, setCurrentIndex] = useState(-1);
 
-    // Safe evaluation function
+    const inputRef = useRef(null); // Create a ref for the input field
+
+    useEffect(() => {
+        inputRef.current.focus(); // Focus the input field when the component mounts
+    }, []);
+
     const safeEval = (expression) => {
         try {
             return new Function(`return ${expression}`)();
@@ -24,47 +30,42 @@ export default function Calculator() {
             setTimeout(() => {
                 setError('');
                 setVisible(false);
-            }, 3000); // Clear error after 3 seconds
-            return 'Error' + error.message;
+            }, 3000);
+            return 'Error';
         }
     };
 
-    // Update local storage whenever prevCalculation changes
     useEffect(() => {
         localStorage.setItem('prevCalculation', JSON.stringify(prevCalculation));
     }, [prevCalculation]);
 
-    // Handle button clicks for numbers and operations
     const handleButtonClick = (value) => {
         setInput((prev) => prev + value);
     };
 
-    // Perform calculation
     const calculate = () => {
         const result = safeEval(input);
         setOutput(result.toString());
-
-        // Update previous calculations
         setPrevCalculation((prev) => [
             ...prev,
             { input: input, output: result },
         ]);
-        setCurrentIndex(prevCalculation.length); // Set index to the latest calculation
+        setCurrentIndex(prevCalculation.length);
+        setOldInput(input); // Store the old input for display
+        setInput(''); // Clear the input for new typing
     };
 
-    // Clear input
     const clearInput = () => {
         setInput('');
         setOutput('0');
-        setCurrentIndex(-1); // Reset index
+        setCurrentIndex(-1);
+        setOldInput(''); // Clear the old input
     };
 
-    // Delete last character
     const deleteLastChar = () => {
         setInput((prev) => prev.slice(0, -1));
     };
 
-    // Memory Up: Display the previous calculation
     const memoryUp = () => {
         if (prevCalculation.length === 0) {
             setMessage('No previous calculations available.');
@@ -72,7 +73,7 @@ export default function Calculator() {
             setTimeout(() => {
                 setMessage('');
                 setVisible(false);
-            }, 3000); // Clear message after 3 seconds
+            }, 3000);
             return;
         }
 
@@ -87,11 +88,10 @@ export default function Calculator() {
             setTimeout(() => {
                 setMessage('');
                 setVisible(false);
-            }, 3000); // Clear message after 3 seconds
+            }, 3000);
         }
     };
 
-    // Memory Down: Display the next calculation
     const memoryDown = () => {
         if (prevCalculation.length === 0) {
             setMessage('No previous calculations available.');
@@ -99,7 +99,7 @@ export default function Calculator() {
             setTimeout(() => {
                 setMessage('');
                 setVisible(false);
-            }, 3000); // Clear message after 3 seconds
+            }, 3000);
             return;
         }
 
@@ -114,33 +114,47 @@ export default function Calculator() {
             setTimeout(() => {
                 setMessage('');
                 setVisible(false);
-            }, 3000); // Clear message after 3 seconds
+            }, 3000);
         }
     };
 
-    // Clear calculation history
     const forgetMemory = () => {
         clearInput();
-        localStorage.removeItem('prevCalculation'); // Remove from local storage
-        setPrevCalculation([]); // Reset state
-        setCurrentIndex(-1); // Reset index
+        localStorage.removeItem('prevCalculation');
+        setPrevCalculation([]);
+        setCurrentIndex(-1);
         setMessage('Memory Cleared');
         setVisible(true);
         setTimeout(() => {
             setMessage('');
             setVisible(false);
-        }, 3000); // Clear message after 3 seconds
+        }, 3000);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            calculate();
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setInput(e.target.value); // Update input as the user types
     };
 
     return (
         <div className='calculator'>
-            <input
-                type='text'
-                placeholder='0'
-                value={input}
-                className='input'
-                readOnly
-            />
+            <div className='input-container'>
+                {oldInput && <span className='old-input'>{oldInput} =</span>}
+                <input
+                    type='text'
+                    placeholder='0'
+                    value={input}
+                    className='input'
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    ref={inputRef}
+                />
+            </div>
             <div className='output'>{output}</div>
             <div className='keypad'>
                 <button onClick={() => handleButtonClick('+')}>+</button>
@@ -173,12 +187,8 @@ export default function Calculator() {
                     Forget
                 </button>
             </div>
-            {visible && (
-                <div className='message'>{message}</div>
-            )}
-            {visible && (
-                <div className='error'>{error}</div>
-            )}
+            {visible && <div className='message'>{message}</div>}
+            {visible && <div className='error'>{error}</div>}
         </div>
     );
 }
